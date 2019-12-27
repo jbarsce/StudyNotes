@@ -15,7 +15,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{afterpage}
-
+\usepackage[square,sort,comma,numbers]{natbib}
 
 \begin{document}
 
@@ -31,7 +31,7 @@ RL in 3 Equations (from Nando de Freitas talk at Khipu)
 
 \subsection{Algorithms}
 
-\subsubsection{TRPO}
+\subsubsection{TRPO \cite{schulman_trust_2015}}
 
 Link: \url{https://arxiv.org/abs/1502.05477}
 
@@ -39,22 +39,32 @@ Link: \url{https://arxiv.org/abs/1502.05477}
 
 \begin{enumerate}
   \item Given the advantage $\eta(\tilde{\pi})$ of a policy $\tilde{\pi}$ over a policy $\pi$.
-  \item Kakade and Langford already shown that if $\pi_\theta(a \mid s)$ is a differentiable function of the parameter vector $\theta$, then an approximation of the advantage $L_\pi(\tilde{\pi})$ (which used visitation frequency $\rho_\pi$ instead of $\rho_\tilde{\pi}$) will match $\eta$ to first order, with a sufficiently small step $\alpha$.
+  \item It was shown in Kakade and Langford (2002) that if $\pi_\theta(a \mid s)$ is a differentiable function of the parameter vector $\theta$, then an approximation of the advantage $L_\theta(\tilde{\theta})$ (which used visitation frequency $\rho_\theta$ instead of $\rho_{\tilde{\theta}}$) will match $\eta$ to first order, with a sufficiently small step $\alpha$.
 \end{enumerate}
 
-Problem: how to determine the sufficiently small step that improves the approximation $L_{\pi_{\theta_{old}}}$, that is also applicable to stochastic policies?
+Problem: how to determine the sufficiently small step that improves the approximation $L_{\theta_{old}(\theta)}$, is also applicable to stochastic policies?
 
-\underline{Solution proposed}
 
-Replace $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$
+\underline{Proposed approach}
+
+\begin{enumerate}
+  \item Replace $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$.
+  \item An algorithm similar to policy improvement is used to iteratively 1) calculate the advantages of the policy $\theta_i$ for every $s,a$ and 2) solves the constrained optimization problem $\pi_{i+1} = \arg\max_\pi [L_{\theta_i} - C D_{KL}^{\max}(\theta_i, \theta)]$.
+  \item Using the penalty coefficient $C$ will involve very small step sizes.
+  \item Therefore, an additional \textit{trust region constraint} is added to relax the optimization problem, that now seeks to maximize $L_{\theta}$, where the $KL$ divergence is subject to be lesser than a certain $\delta$.
+  \item Now, calculating the $KL$ divergence as it is is infeasible due that it is bounded by every point in the state space.
+\end{enumerate}
 
 \subsubsection{PPO}
 
-\subsection{Intersting papers}
-
+\subsection{Interesting papers}
 
 
 https://openreview.net/pdf?id=r1etN1rtPB
 
+
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography.bib}
 
 \end{document}
