@@ -1,0 +1,60 @@
+\documentclass[12pt, english]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{fancyhdr}
+\usepackage{pdfpages}
+\usepackage[toc,page]{appendix}
+\usepackage{hyperref}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+\usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{afterpage}
+
+
+\begin{document}
+
+\section{Reinforcement learning}
+
+RL in 3 Equations (from Nando de Freitas talk at Khipu)
+
+\begin{eqnarray}
+  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
+  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_{d_\pi}(s) \pi(a \mid s) [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
+  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a]
+\end{eqnarray}
+
+\subsection{Algorithms}
+
+\subsubsection{TRPO}
+
+Link: \url{https://arxiv.org/abs/1502.05477}
+
+\underline{Problem addressed}:
+
+\begin{enumerate}
+  \item Given the advantage $\eta(\tilde{\pi})$ of a policy $\tilde{\pi}$ over a policy $\pi$.
+  \item Kakade and Langford already shown that if $\pi_\theta(a \mid s)$ is a differentiable function of the parameter vector $\theta$, then an approximation of the advantage $L_\pi(\tilde{\pi})$ (which used visitation frequency $\rho_\pi$ instead of $\rho_\tilde{\pi}$) will match $\eta$ to first order, with a sufficiently small step $\alpha$.
+\end{enumerate}
+
+Problem: how to determine the sufficiently small step that improves the approximation $L_{\pi_{\theta_{old}}}$, that is also applicable to stochastic policies?
+
+\underline{Solution proposed}
+
+Replace $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$
+
+\subsubsection{PPO}
+
+\subsection{Intersting papers}
+
+
+
+https://openreview.net/pdf?id=r1etN1rtPB
+
+
+\end{document}
