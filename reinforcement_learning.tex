@@ -53,6 +53,8 @@ $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)}
 
 Link: \url{https://arxiv.org/abs/1502.05477}
 
+\underline{TL;DR}: TRPO updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i}$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step.
+
 \underline{Problem addressed}:
 
 \begin{enumerate}
@@ -66,12 +68,37 @@ Problem: how to determine the sufficiently small step that improves the approxim
 \underline{Proposed approach}
 
 \begin{enumerate}
-  \item Replace $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$.
+  \item Replace step-size $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$.
   \item An algorithm similar to policy improvement is used to iteratively 1) calculate the advantages of the policy $\theta_i$ for every $s,a$ and 2) solves the constrained optimization problem $\pi_{i+1} = \arg\max_\pi [L_{\theta_i} - C D_{KL}^{\max}(\theta_i, \theta)]$.
   \item Using the penalty coefficient $C$ will involve very small step sizes.
   \item Therefore, an additional \textit{trust region constraint} is added to relax the optimization problem, that now seeks to maximize $L_{\theta}$, where the $KL$ divergence is subject to be lesser than a certain $\delta$.
-  \item Now, calculating the $KL$ divergence as it is is infeasible due that it is bounded by every point in the state space.
+  \item Now, calculating the $KL$ divergence as it is, is infeasible due that it is bounded by every point in the state space.
+  Instead, it is calculated the average $KL$ divergence using importance sampling, replacing the expectations for sample averages, $Q$-values for empirical estimate, and approximating through Monte Carlo.
+  \item Two schemes proposed for this estimation:
+
+  \begin{enumerate}
+    \item Single path estimation, where states $s$ are sampled from $\rho$ (the visitation frequency) and then a policy $\pi_{\theta_{old}}$ is simulated for a number of timesteps to generate a trajectory, making $b(a \mid s) = \pi_{\theta_{old}}$.
+    Also, $Q_{\theta_{old}}$ is computed at each state-action pair taking the discounted sum of rewards along the trajectory.
+
+    \item Vine, where states $s$ are sampled from $\rho$ (the visitation frequency) and then a policy $\pi_{\theta_{old}}$ is simulated for a number of timesteps to generate a trajectory, just like in single path estimation.
+    Then, a subset of $N$ states of the trajectories are chosen (rollout set), and each of them are used to sample $K$ actions according to $b(a_{k \in K} \mid s_{n \in N})$. According to the authors, $b(s \mid a) = \pi_{\theta_i (s \mid a)}$ performs well in continuous problems, while the uniform distribution performs well on discrete tasks such as Atari.
+
+    $\hat{Q}_{\theta_i}(s_n, a_{n,k})$ is estimated by performing a rollout (i.e. a short trajectory) starting from state $s_n$ and action $a_{n,k}$.
+
+    Upsides against single path: better advantage estimation, less variance of the $Q$ value.
+    Downsides: need more simulations.
+  \end{enumerate}
+
 \end{enumerate}
+
+Summarized algorithm:
+
+\begin{enumerate}
+  \item Use single path or vine to gather $(s,a)$ pairs, estimating its $Q$-values with Monte Carlo and using the importance sampling ratio.
+  \item Averaging over samples, construct the estimated objective function and constraint.
+  \item Solve this optimization problem with constraint to update the policy vector $\theta$. In the paper, authors use conjugate gradient algorithm followed by a line search.
+\end{enumerate}
+
 
 \subsubsection{PPO}
 
