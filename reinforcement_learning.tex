@@ -83,7 +83,7 @@ Considering Eqn. \ref{eqn_expected_return} and Eqn. \ref{eqn_grad_log_trajectory
   \nabla_\theta J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [\sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)]
 \end{equation}
 %
-As it is an expectation, it can be estimated by a sample mean. Therefore, if we have a set of trajectories $D = {\tau_1, \dots, \tau_N}$, a gradient ascent step can be done estimating the policy gradient with
+This is called the \textbf{policy gradient theorem}. As it is an expectation, it can be estimated by a sample mean. Therefore, if we have a set of trajectories $D = {\tau_1, \dots, \tau_N}$, a gradient ascent step can be done estimating the policy gradient with
 
 \begin{equation}
   \hat{g} = \frac{1}{|D|} \sum_{\tau \in D} \sum_{t=0}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)
