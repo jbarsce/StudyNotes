@@ -15,13 +15,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{afterpage}
+\usepackage{cancel}
 \usepackage[square,sort,comma,numbers]{natbib}
 
 \begin{document}
 
-\section{Reinforcement learning}
-
-RL in 3 Equations (from Nando de Freitas talk at Khipu)
+RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
 
 \begin{eqnarray}
   \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
@@ -29,9 +28,70 @@ RL in 3 Equations (from Nando de Freitas talk at Khipu)
   Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a]
 \end{eqnarray}
 
-\subsection{Key concepts}
+\newpage
 
-\subsubsection{Importance sampling}
+\tableofcontents
+
+\newpage
+
+\section{Key concepts}
+
+\subsection{Policy gradient}
+
+Given $\pi_\theta$, a stochastic policy parametrized with $\theta$. Our objective is to maximize the expected return
+\begin{equation}
+  \label{eqn_expected_return}
+  J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [R(\tau)]
+\end{equation}
+%
+where $R(\tau)$ is the sum of discounted rewards over the sampled trajectory $\tau = (s_0, a_0, \dots, s_{t+1})$.
+
+The aim is to optimize the policy by gradient ascent, such that
+
+\begin{equation}
+  \theta_{t+1} = \theta_t + \alpha J(\pi_\theta)\Bigr|_{\theta_t}
+\end{equation}
+
+How to find a numberically computable expression? The probability of a trajectory $\tau$ whose policy is based on $\pi$ with parameters $\theta$, is given by
+
+\begin{equation}
+  \label{eqn_trajectory_probability}
+  P(\tau \mid \theta) = \rho_0 (s_0) \prod_{t=0}^T P(s_{t+1} \mid s_t, a_t) \pi_\theta (a_t \mid s_t)
+\end{equation}
+%
+where $\rho_0 (s_0)$ is the probability distribution of the initial state.
+
+Considering that $\nabla \log (x) = \frac{1}{x}$, therefore
+
+\begin{eqnarray*}
+  \nabla_\theta \log (P(\tau \mid \theta)) &=& \frac{1}{P(\tau \mid \theta)} \nabla_\theta P(\tau \mid \theta) \\ \nonumber
+  P(\tau \mid \theta) \nabla_\theta \log (P(\tau \mid \theta)) &=& \nabla_\theta P(\tau \mid \theta)
+\end{eqnarray*}
+
+On the other hand, log of a trajectory is given by
+
+\begin{eqnarray}
+  \log P(\tau \mid \theta) &=& \log \rho_0 (s_0) + \sum_{t=1}^T [\log P(s_{t+1} \mid s_t, a_t) + \log \pi_\theta (a_t \mid s_t)] \\
+  \text{applying gradient} \nonumber \\
+  \nabla_\theta \log P(\tau \mid \theta) &=& \cancel{\nabla_\theta \log \rho_0 (s_0)} + \sum_{t=1}^T[ \cancel{\nabla_\theta \log P(s_{t+1} \mid s_t, a_t)} + \nabla_\theta \log \pi_\theta (a_t \mid s_t)] \nonumber \\
+  \nabla_\theta \log P(\tau \mid \theta) &=& \sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] \label{eqn_grad_log_trajectory}
+\end{eqnarray}
+
+Considering Eqn. \ref{eqn_expected_return} and Eqn. \ref{eqn_grad_log_trajectory} and that $\nabla_\theta R(\tau)$ is also $0$ as the return does not depend on $\theta$, expanding the expectation it is derived that
+
+\begin{equation}
+  \nabla_\theta J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [\sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)]
+\end{equation}
+%
+As it is an expectation, it can be estimated by a sample mean. Therefore, if we have a set of trajectories $D = {\tau_1, \dots, \tau_N}$, a gradient ascent step can be done estimating the policy gradient with
+
+\begin{equation}
+  \hat{g} = \frac{1}{|D|} \sum_{\tau \in D} \sum_{t=0}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)
+\end{equation}
+
+Section based on \url{https://spinningup.openai.com/en/latest/user/introduction.html}
+
+\subsection{Importance sampling}
 
 Prediction problem: exploration policy $b$ (considered as fixed/given, e.g. $\epsilon$-greedy policy), target policy $\pi$ (e.g. optimal policy, considered as fixed/given, a common case is the deterministic greedy policy). We have episodes of experience obtained by following policy $b$. How to estimate $v_\pi$ or $q_\pi$ having episodes that followed exploration policy $b$.
 
@@ -47,13 +107,13 @@ Now, $V_b (s) = \mathbb{E} [R_t \mid s_t = s]$, where $R_t$ is the sum of discou
 
 $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)} R_t \mid s_t = s]$
 
-\subsection{Algorithms}
+\section{Algorithms}
 
-\subsubsection{TRPO \cite{schulman_trust_2015}}
+\subsection{TRPO}
 
 Link: \url{https://arxiv.org/abs/1502.05477}
 
-\underline{TL;DR}: TRPO updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i}$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step.
+\underline{TL;DR}: TRPO \cite{schulman_trust_2015} updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i}$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step.
 
 \underline{Problem addressed}:
 
@@ -100,9 +160,19 @@ Summarized algorithm:
 \end{enumerate}
 
 
-\subsubsection{PPO}
+\subsection{PPO}
 
-\subsection{Interesting papers}
+Link: \url{https://arxiv.org/abs/1707.06347}
+
+\underline{TL;DR}
+
+PPO \cite{schulman_proximal_2017}
+
+\underline{Problem addressed}
+
+\underline{Proposed approach}
+
+\section{Interesting papers}
 
 
 https://openreview.net/pdf?id=r1etN1rtPB
