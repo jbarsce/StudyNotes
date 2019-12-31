@@ -80,14 +80,28 @@ On the other hand, log of a trajectory is given by
 Considering Eqn. \ref{eqn_expected_return} and Eqn. \ref{eqn_grad_log_trajectory} and that $\nabla_\theta R(\tau)$ is also $0$ as the return does not depend on $\theta$, expanding the expectation it is derived that
 
 \begin{equation}
+  \label{eqn_policy_gradient}
   \nabla_\theta J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [\sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)]
 \end{equation}
 %
 This is called the \textbf{policy gradient theorem}. As it is an expectation, it can be estimated by a sample mean. Therefore, if we have a set of trajectories $D = {\tau_1, \dots, \tau_N}$, a gradient ascent step can be done estimating the policy gradient with
 
 \begin{equation}
+  \label{eqn_policy_gradient_estimated}
   \hat{g} = \frac{1}{|D|} \sum_{\tau \in D} \sum_{t=0}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)
 \end{equation}
+
+A common form of Equation \ref{eqn_policy_gradient} and Equation \ref{eqn_policy_gradient_estimated} involves the estimated advantage $\hat{A}_t$ instead of the return $R(\tau)$.
+
+Vanilla policy gradient is the simplest algorithm that makes use of this theorem. It collects trajectories $D = {\tau_1, \dots, \tau_N}$ by running policy $\pi_i = \pi(\theta_i)$. Then, it uses the parameters $\phi$ of the value function $V_\phi$ to compute the advantage function $\hat{A}_t$ to estimate \ref{eqn_policy_gradient_estimated}, and then performs two updates:
+
+\begin{enumerate}
+  \item Update of the policy:
+  $$\theta_{k+1} = \theta_k + \alpha_k \hat{g}_k$$
+  \item Update of the value function, by regression on the mean squared error:
+  $$\phi_{k+1} = \arg\min_\phi \frac{1}{|D_k|T} \sum_{\tau \in D_k} \sum_{t=0}^T (V_\phi(s_t) - \hat{R_t})^2$$
+  where $\hat{R_t}$ are the discounted rewards.
+\end{enumerate}
 
 Section based on \url{https://spinningup.openai.com/en/latest/user/introduction.html}
 
@@ -109,13 +123,28 @@ $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)}
 
 \section{Algorithms}
 
+\subsection{ACER}
+
+Link: \url{}
+
+ACER
+
+\subsection{GAE}
+
+Link: \url{}
+
+GAE
+
+
 \subsection{TRPO}
 
 Link: \url{https://arxiv.org/abs/1502.05477}
 
-\underline{TL;DR}: TRPO \cite{schulman_trust_2015} updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i}$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step.
+\underline{TL;DR}
 
-\underline{Problem addressed}:
+TRPO \cite{schulman_trust_2015} is an on-policy algorithm that updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i} = \mathbb{E} \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_old (a_t \mid s_t)}} A_t$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step that iteratively adapts over the course of the learning.
+
+\underline{Problem addressed}
 
 \begin{enumerate}
   \item Given the advantage $\eta(\tilde{\pi})$ of a policy $\tilde{\pi}$ over a policy $\pi$.
@@ -128,7 +157,7 @@ Problem: how to determine the sufficiently small step that improves the approxim
 \underline{Proposed approach}
 
 \begin{enumerate}
-  \item Replace step-size $\alpha$ with a distance measure between $\pi$ and $\tilde{pi}$.
+  \item Replace step-size $\alpha$ with a distance measure between $\pi$ and $\tilde{\pi}$.
   \item An algorithm similar to policy improvement is used to iteratively 1) calculate the advantages of the policy $\theta_i$ for every $s,a$ and 2) solves the constrained optimization problem $\pi_{i+1} = \arg\max_\pi [L_{\theta_i} - C D_{KL}^{\max}(\theta_i, \theta)]$.
   \item Using the penalty coefficient $C$ will involve very small step sizes.
   \item Therefore, an additional \textit{trust region constraint} is added to relax the optimization problem, that now seeks to maximize $L_{\theta}$, where the $KL$ divergence is subject to be lesser than a certain $\delta$.
@@ -166,11 +195,40 @@ Link: \url{https://arxiv.org/abs/1707.06347}
 
 \underline{TL;DR}
 
-PPO \cite{schulman_proximal_2017}
+PPO \cite{schulman_proximal_2017} is an on-policy algorithm that...
 
 \underline{Problem addressed}
 
+How to take the biggest possible improvement step on a policy update without it being too much that the learning may collapse the performance?
+
+TRPO implements a penalty that is necessary, but as it is, optimizing its objective may involve excessively large update steps on the policy, prone to unstabilities.
+
 \underline{Proposed approach}
+
+Being $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}$ the probability ratio between the old policy and new policy, being $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)} = 1$ when it is the same policy.
+
+The approach of Proximal Policy Optimization (PPO) is to penalize changes of the policy that moves the coefficient $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}$ away from $1$. For that, the objective function proposed is given by
+
+\begin{equation}
+  \label{eqn_clipped_objective}
+  L_{\text{CLIP}} (\theta) = \hat{\mathbb{E}} [\min (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)} \hat{A}_t(s,a), \text{clip} (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)},1-\epsilon, 1+\epsilon) \hat{A}_t(s,a))]
+\end{equation}
+
+Put in other terms, if $\hat{A}_t(s,a) > 0$, this means that action $a$ is improving the policy. Therfore, the objective will be given by
+
+\begin{equation*}
+  L_{\text{CLIP}} (\theta) = \min (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}, 1+\epsilon) \hat{A}_t(s,a)
+\end{equation*}
+
+Otherwise, if $\hat{A}_t(s,a) < 0$, action $a$ is detrimental for the policy, and the objective will be given by
+
+\begin{equation*}
+  L_{\text{CLIP}} (\theta) = \max (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}, 1-\epsilon) \hat{A}_t(s,a)
+\end{equation*}
+
+In Equation \ref{eqn_clipped_objective}, the aim is 1) to prevent the surrogate (approximated) objective funtion to fall in ranges of $r_t(\theta)$ outside the interval $[1-\epsilon, 1+\epsilon]$ so as to limit the change in the policy, and 2) to take the minimum of the clipped and unclipped objective so the final objective is a lower (pessimistic) bound.
+
+As an alternative, a penalty that uses $KL$ divergence such as in TRPO and adapts its cost parameter $\beta$ according to the magnitude of the divergence may be used.
 
 \section{Interesting papers}
 
