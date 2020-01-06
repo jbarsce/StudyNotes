@@ -17,6 +17,9 @@
 \usepackage{afterpage}
 \usepackage{cancel}
 \usepackage[square,sort,comma,numbers]{natbib}
+\setlength{\parindent}{0pt} % set indent of the first line of the paragraph
+\setlength{\parskip}{0.1cm} % set space between paragraphs
+\usepackage[left=1.1in,right=1.1in,top=1.5in,bottom=1.5in]{geometry}
 
 \begin{document}
 
@@ -24,7 +27,7 @@ RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
 
 \begin{eqnarray}
   \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
-  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_{d_\pi}(s) \pi(a \mid s) [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
+  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_{d_\pi(s) \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
   Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a]
 \end{eqnarray}
 
@@ -135,6 +138,9 @@ Link: \url{}
 
 GAE
 
+\subsection{DQN}
+
+
 
 \subsection{TRPO}
 
@@ -189,13 +195,43 @@ Summarized algorithm:
 \end{enumerate}
 
 
+\subsection{DDPG}
+
+Link: \url{https://arxiv.org/pdf/1509.02971.pdf}
+
+\underline{TL;DR}
+DDPG \cite{lillicrap_continuous_2015} ...
+
+\underline{Background: DPG}
+
+Deep policy gradient ...
+
+\underline{Problem addressed}
+
+How to use $Q$-learning algorithms when the action space is continuous?
+
+\underline{Proposed approach}
+
+DQN modified for actor critic. It learns a deterministic actor function $a(s \mid \theta_a)$ and a critic function $Q(s,a \mid \theta_c)$. As finding $\max_a Q(s,a)$ in continuous action spaces is computationally expensive, the max is instead approximated by $\max_a Q(s,a \mid \theta_c) \approx Q(s, a(s \mid \theta_a))$.
+
+Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient
+
+\begin{equation}
+  \nabla_{\theta_a} J \approx \frac{1}{N} \sum_{s \in N} \nabla_{\theta_a} Q(s,a(s \mid \theta_a) \mid \theta_c) \nabla_{\theta_a} a(s \mid \theta_a)
+\end{equation}
+%
+where $N$ is the batch and $|N|$ its size.
+
+Use a replay memory as in DQN, .
+Actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
+
 \subsection{PPO}
 
 Link: \url{https://arxiv.org/abs/1707.06347}
 
 \underline{TL;DR}
 
-PPO \cite{schulman_proximal_2017} is an on-policy algorithm that...
+PPO \cite{schulman_proximal_2017} is an on-policy algorithm that updates its policy $\pi_{\theta_{k+1}}$ by taking gradient ascent over an objetive function that limits (by clipping or applying a penalization based on the KL divergence) how far the new policy can go.
 
 \underline{Problem addressed}
 
