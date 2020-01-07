@@ -25,11 +25,15 @@
 
 RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
 
+Most RL algorithms can be divided into three families: policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_trajectory}), $Q$-value policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_value}) and $Q$-value algorithms (Eqn. \ref{eqn_action_value_function}).
+
 \begin{eqnarray}
-  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
-  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_\pi(s) \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
-  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a]
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \label{eqn_policy_gradient_trajectory} \\
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_{\pi(s)} \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \label{eqn_policy_gradient_value}\\
+  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a] \label{eqn_action_value_function}
 \end{eqnarray}
+%
+where $J(\pi_\theta)$ is the expected return of a policy $\pi$ parametrized with $\theta$, $\tau$ is a trajectory with length $T$, and $d_{\pi(s)}$ is the probability distribution of the states.
 
 \newpage
 
@@ -125,22 +129,6 @@ Now, $V_b (s) = \mathbb{E} [R_t \mid s_t = s]$, where $R_t$ is the sum of discou
 $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)} R_t \mid s_t = s]$
 
 \section{Algorithms}
-
-\subsection{ACER}
-
-Link: \url{}
-
-ACER
-
-\subsection{GAE}
-
-Link: \url{}
-
-GAE
-
-\subsection{DQN}
-
-
 
 \subsection{TRPO}
 
@@ -268,6 +256,33 @@ Otherwise, if $\hat{A}_t(s,a) < 0$, action $a$ is detrimental for the policy, an
 In Equation \ref{eqn_clipped_objective}, the aim is 1) to prevent the surrogate (approximated) objective funtion to fall in ranges of $r_t(\theta)$ outside the interval $[1-\epsilon, 1+\epsilon]$ so as to limit the change in the policy, and 2) to take the minimum of the clipped and unclipped objective so the final objective is a lower (pessimistic) bound.
 
 As an alternative, a penalty that uses $KL$ divergence such as in TRPO and adapts its cost parameter $\beta$ according to the magnitude of the divergence may be used.
+
+\subsection{TODOs}
+
+Policy-gradient
+
+\begin{itemize}
+  \item A2C \url{https://arxiv.org/pdf/1602.01783.pdf}
+  \item ACER \url{https://arxiv.org/pdf/1611.01224.pdf}
+  \item IMPALA \url{https://arxiv.org/pdf/1802.01561.pdf}
+  \item GAE \url{https://arxiv.org/pdf/1506.02438.pdf}
+\end{itemize}
+
+Q Policy-gradient
+
+\begin{itemize}
+  \item SAC 
+  \item TD3
+\end{itemize}
+
+DQN-like
+\begin{itemize}
+  \item DQN
+  \item Rainbow
+  \item R2D2
+\end{itemize}
+
+
 
 \section{Interesting papers}
 
