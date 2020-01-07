@@ -198,7 +198,7 @@ How to use $Q$-learning algorithms when the action space is continuous?
 
 DQN modified for actor critic. It learns a deterministic actor function $a(s \mid \theta_a)$ and a critic function $Q(s,a \mid \theta_c)$. As finding $\max_a Q(s,a)$ in continuous action spaces is computationally expensive, the max is instead approximated by $\max_a Q(s,a \mid \theta_c) \approx Q(s, a(s \mid \theta_a))$.
 
-Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient and applying the chain rule.
+Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient and applying the chain rule to find the $\theta_a$ that maximizes
 
 \begin{equation}
   \nabla_{\theta_a} J (\pi_{\theta_a}) \approx \frac{1}{|N|} \sum_{s \in N} \nabla_{\theta_a} Q(s,a(s \mid \theta_a) \mid \theta_c) \nabla_{\theta_a} a(s \mid \theta_a)
@@ -215,6 +215,8 @@ As it is off-policy, DDPG uses a replay memory as in DQN to iteratively update i
 %
 where $\rho << 1$.
 On the other hand, actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
+
+
 
 \subsection{PPO}
 
@@ -257,6 +259,51 @@ In Equation \ref{eqn_clipped_objective}, the aim is 1) to prevent the surrogate 
 
 As an alternative, a penalty that uses $KL$ divergence such as in TRPO and adapts its cost parameter $\beta$ according to the magnitude of the divergence may be used.
 
+\subsection{TD3}
+
+Link: \url{https://arxiv.org/pdf/1802.09477.pdf}
+
+\underline{TL;DR}
+
+TD3 \cite{fujimoto_addressing_2018} is an improvement of DDPG that uses two $Q$ functions and a delayed update of the actor policy in order to avoid overestimation of the $Q$ values.
+
+\underline{Problem addressed}
+
+How to avoid overestimation on the $Q$ function in DDPG?
+
+\underline{Proposed approach}
+
+Twin Delayed DDPG boosts DDPG by:
+
+\begin{itemize}
+  \item Using two $Q$ functions $Q_{\phi_1}$ and $Q_{\phi_2}$ instead of one, and using the smaller estimation of the two in order to compute the target $y$. The same target is used to update both.
+  \item Using a random noise for exploration, but clipping it in order to ensure it falls in valid action ranges.
+  \item Learning the policy by gradient ascent such as in DDPG, but only after a delay and by maximizing $J(\theta_a)$ regarding the value $Q_{\phi_1}$, (i.e. not using $Q_{\phi_2}$).
+\end{itemize}
+
+
+\subsection{SAC}
+
+Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
+
+\underline{TL;DR}
+
+SAC \cite{haarnoja_soft_2018} is an off-policy actor critic algorithm based in maximum entropy reinforcement learning with an stochastic actor (i.e. an actor that learns from sampling actions based on the current policy instead of using past actions from memory) with the aim of producing more stable and efficient learning.
+
+\underline{Problem addressed}
+
+Using an off-policy algorithm, how to achieve stability in learning?
+
+\underline{Proposed approach}
+
+Proposed approach consisting in:
+
+\begin{itemize}
+  \item Learning $Q_{\phi_1}$ and $Q_{\phi_2}$ functions as in TD3, a policy $\pi_\theta$ and a value function $V_\psi$.
+  \item Using entropy regularization ...
+\end{itemize}
+
+
 \subsection{TODOs}
 
 Policy-gradient
@@ -271,8 +318,7 @@ Policy-gradient
 Q Policy-gradient
 
 \begin{itemize}
-  \item SAC 
-  \item TD3
+  \item
 \end{itemize}
 
 DQN-like
