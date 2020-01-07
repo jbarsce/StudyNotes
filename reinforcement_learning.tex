@@ -26,8 +26,8 @@
 RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
 
 \begin{eqnarray}
-  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
-  \nabla_\theta \rho_\pi (\theta) &=& \mathbb{E}_{d_\pi(s) \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \\
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_\pi(s) \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \\
   Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a]
 \end{eqnarray}
 
@@ -200,11 +200,7 @@ Summarized algorithm:
 Link: \url{https://arxiv.org/pdf/1509.02971.pdf}
 
 \underline{TL;DR}
-DDPG \cite{lillicrap_continuous_2015} ...
-
-\underline{Background: DPG}
-
-Deep policy gradient ...
+DDPG \cite{lillicrap_continuous_2015} is an off-policy actor critic algorithm that trains simultaneously a deterministic actor function $a$ and a critic function $Q$ with an experience memory.
 
 \underline{Problem addressed}
 
@@ -214,16 +210,23 @@ How to use $Q$-learning algorithms when the action space is continuous?
 
 DQN modified for actor critic. It learns a deterministic actor function $a(s \mid \theta_a)$ and a critic function $Q(s,a \mid \theta_c)$. As finding $\max_a Q(s,a)$ in continuous action spaces is computationally expensive, the max is instead approximated by $\max_a Q(s,a \mid \theta_c) \approx Q(s, a(s \mid \theta_a))$.
 
-Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient
+Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient and applying the chain rule.
 
 \begin{equation}
-  \nabla_{\theta_a} J \approx \frac{1}{N} \sum_{s \in N} \nabla_{\theta_a} Q(s,a(s \mid \theta_a) \mid \theta_c) \nabla_{\theta_a} a(s \mid \theta_a)
+  \nabla_{\theta_a} J (\pi_{\theta_a}) \approx \frac{1}{|N|} \sum_{s \in N} \nabla_{\theta_a} Q(s,a(s \mid \theta_a) \mid \theta_c) \nabla_{\theta_a} a(s \mid \theta_a)
 \end{equation}
 %
-where $N$ is the batch and $|N|$ its size.
+where $N$ is the batch $\{(s_i, a_i, r_i, s_{i+1})\}^{|N|}_{i=1}$ and $|N|$ its size.
 
-Use a replay memory as in DQN, .
-Actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
+As it is off-policy, DDPG uses a replay memory as in DQN to iteratively update its actor and critic networks by
+
+\begin{eqnarray}
+  \theta'_a &=& \rho \theta'_a + (1-\rho) \nabla J (\pi_{\theta_a}) \\
+  \theta'_c &=& \rho \theta'_c + (1-\rho) \theta_c
+\end{eqnarray}
+%
+where $\rho << 1$.
+On the other hand, actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
 
 \subsection{PPO}
 
