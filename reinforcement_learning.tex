@@ -128,6 +128,10 @@ Now, $V_b (s) = \mathbb{E} [R_t \mid s_t = s]$, where $R_t$ is the sum of discou
 
 $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)} R_t \mid s_t = s]$
 
+\subsection{Reparametrization trick}
+
+\url{https://arxiv.org/pdf/1312.6114.pdf}
+
 \section{Algorithms}
 
 \subsection{TRPO}
@@ -288,19 +292,20 @@ Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
 
 \underline{TL;DR}
 
-SAC \cite{haarnoja_soft_2018} is an off-policy actor critic algorithm based in maximum entropy reinforcement learning with an stochastic actor (i.e. an actor that learns from sampling actions based on the current policy instead of using past actions from memory) with the aim of producing more stable and efficient learning.
+SAC \cite{haarnoja_soft_2018} is an off-policy actor critic algorithm based in maximum entropy reinforcement learning with an stochastic actor (i.e. an actor that learns from sampling actions based on the current policy instead of using past actions from memory) with the aim of maximizing both the reward and entropy (i.e. succeed at the task while acting as randomly as possible).
 
 \underline{Problem addressed}
 
-Using an off-policy algorithm, how to achieve stability in learning?
+Using an off-policy algorithm (to avoid sampling inefficiency), how to achieve stability and convergence in learning?
 
 \underline{Proposed approach}
 
 Proposed approach consisting in:
 
 \begin{itemize}
-  \item Learning $Q_{\phi_1}$ and $Q_{\phi_2}$ functions as in TD3, a policy $\pi_\theta$ and a value function $V_\psi$.
-  \item Using entropy regularization ...
+  \item An off policy formulation to reuse previous experience.
+  \item An actor-critic architecture that learns 1) $Q_{\phi_1}$ and $Q_{\phi_2}$ functions as in TD3, 2) a policy $\pi_\theta$ and 3) a value function $V_\psi$. In this setting, the architecture employs a stochastic actor .
+  \item Using entropy regularized reinfocement learning in order to give the agent an extra reward proportional to the entropy of the policy at each time step, given by $\alpha H(\pi(a \mid s_t)) = \mathbb{E}[-log(\pi(a \mid s_t))]$, being $\alpha$ an hyper-parameter that controls such bonus and therefore the stochasticity of the optimal policy.
 \end{itemize}
 
 
@@ -334,6 +339,19 @@ DQN-like
 
 
 https://openreview.net/pdf?id=r1etN1rtPB
+
+
+\section{Good references}
+
+\begin{itemize}
+  \item \href{https://spinningup.openai.com/en/latest/spinningup/spinningup.html}{Open AI - Spinning Up as a Deep RL Researcher}
+  \item \href{http://incompleteideas.net/book/the-book-2nd.html}{R. Sutton and A. Barto - Reinforcement Learning: An Introduction (2nd Edition)} and \href{https://github.com/ShangtongZhang/reinforcement-learning-an-introduction}{Python implementation of the exercises}.
+  \item \href{https://www.alexirpan.com/2018/02/14/rl-hard.html}{A. Irpan - Deep Reinforcement Learning Doesn't Work Yet}
+  \item \href{https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html}{L. Weng: A (Long) Peek into Reinforcement Learning}
+  \item \href{http://arxiv.org/abs/1701.07274}{Y. Li - Deep Reinforcement Learning: An Overview}
+\end{itemize}
+
+
 
 
 
