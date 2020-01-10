@@ -1,0 +1,405 @@
+\documentclass[12pt, english]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{fancyhdr}
+\usepackage{pdfpages}
+\usepackage[toc,page]{appendix}
+\usepackage{hyperref}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+\usepackage{float} % Allows putting an [H] in \begin{figure} to specify the exact location of the figure
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{afterpage}
+\usepackage{cancel}
+\usepackage[square,sort,comma,numbers]{natbib}
+\setlength{\parindent}{0pt} % set indent of the first line of the paragraph
+\setlength{\parskip}{0.1cm} % set space between paragraphs
+\usepackage[left=1.1in,right=1.1in,top=1.5in,bottom=1.5in]{geometry}
+
+\begin{document}
+
+RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
+
+Most RL algorithms can be divided into three families: policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_trajectory}), $Q$-value policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_value}) and $Q$-value algorithms (Eqn. \ref{eqn_action_value_function}).
+
+\begin{eqnarray}
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \label{eqn_policy_gradient_trajectory} \\
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_{\pi(s)} \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \label{eqn_policy_gradient_value}\\
+  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a] \label{eqn_action_value_function}
+\end{eqnarray}
+%
+where $J(\pi_\theta)$ is the expected return of a policy $\pi$ parametrized with $\theta$, $\tau$ is a trajectory with length $T$, and $d_{\pi(s)}$ is the probability distribution of the states.
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Key concepts}
+
+\subsection{Policy gradient}
+
+Given $\pi_\theta$, a stochastic policy parametrized with $\theta$. Our objective is to maximize the expected return
+\begin{equation}
+  \label{eqn_expected_return}
+  J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [R(\tau)]
+\end{equation}
+%
+where $R(\tau)$ is the sum of discounted rewards over the sampled trajectory $\tau = (s_0, a_0, \dots, s_{t+1})$.
+
+The aim is to optimize the policy by gradient ascent, such that
+
+\begin{equation}
+  \theta_{t+1} = \theta_t + \alpha J(\pi_\theta)\Bigr|_{\theta_t}
+\end{equation}
+
+How to find a numberically computable expression? The probability of a trajectory $\tau$ whose policy is based on $\pi$ with parameters $\theta$, is given by
+
+\begin{equation}
+  \label{eqn_trajectory_probability}
+  P(\tau \mid \theta) = \rho_0 (s_0) \prod_{t=0}^T P(s_{t+1} \mid s_t, a_t) \pi_\theta (a_t \mid s_t)
+\end{equation}
+%
+where $\rho_0 (s_0)$ is the probability distribution of the initial state.
+
+Considering that $\nabla \log (x) = \frac{1}{x}$, therefore
+
+\begin{eqnarray*}
+  \nabla_\theta \log (P(\tau \mid \theta)) &=& \frac{1}{P(\tau \mid \theta)} \nabla_\theta P(\tau \mid \theta) \\ \nonumber
+  P(\tau \mid \theta) \nabla_\theta \log (P(\tau \mid \theta)) &=& \nabla_\theta P(\tau \mid \theta)
+\end{eqnarray*}
+
+On the other hand, log of a trajectory is given by
+
+\begin{eqnarray}
+  \log P(\tau \mid \theta) &=& \log \rho_0 (s_0) + \sum_{t=1}^T [\log P(s_{t+1} \mid s_t, a_t) + \log \pi_\theta (a_t \mid s_t)] \\
+  \text{applying gradient} \nonumber \\
+  \nabla_\theta \log P(\tau \mid \theta) &=& \cancel{\nabla_\theta \log \rho_0 (s_0)} + \sum_{t=1}^T[ \cancel{\nabla_\theta \log P(s_{t+1} \mid s_t, a_t)} + \nabla_\theta \log \pi_\theta (a_t \mid s_t)] \nonumber \\
+  \nabla_\theta \log P(\tau \mid \theta) &=& \sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] \label{eqn_grad_log_trajectory}
+\end{eqnarray}
+
+Considering Eqn. \ref{eqn_expected_return} and Eqn. \ref{eqn_grad_log_trajectory} and that $\nabla_\theta R(\tau)$ is also $0$ as the return does not depend on $\theta$, expanding the expectation it is derived that
+
+\begin{equation}
+  \label{eqn_policy_gradient}
+  \nabla_\theta J(\pi_\theta) = \mathbb{E}_{\tau \sim \pi_\theta} [\sum_{t=1}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)]
+\end{equation}
+%
+This is called the \textbf{policy gradient theorem}. As it is an expectation, it can be estimated by a sample mean. Therefore, if we have a set of trajectories $D = {\tau_1, \dots, \tau_N}$, a gradient ascent step can be done estimating the policy gradient with
+
+\begin{equation}
+  \label{eqn_policy_gradient_estimated}
+  \hat{g} = \frac{1}{|D|} \sum_{\tau \in D} \sum_{t=0}^T[\nabla_\theta \log \pi_\theta (a_t \mid s_t)] R(\tau)
+\end{equation}
+
+A common form of Equation \ref{eqn_policy_gradient} and Equation \ref{eqn_policy_gradient_estimated} involves the estimated advantage $\hat{A}_t$ instead of the return $R(\tau)$.
+
+Vanilla policy gradient is the simplest algorithm that makes use of this theorem. It collects trajectories $D = {\tau_1, \dots, \tau_N}$ by running policy $\pi_i = \pi(\theta_i)$. Then, it uses the parameters $\phi$ of the value function $V_\phi$ to compute the advantage function $\hat{A}_t$ to estimate \ref{eqn_policy_gradient_estimated}, and then performs two updates:
+
+\begin{enumerate}
+  \item Update of the policy:
+  $$\theta_{k+1} = \theta_k + \alpha_k \hat{g}_k$$
+  \item Update of the value function, by regression on the mean squared error:
+  $$\phi_{k+1} = \arg\min_\phi \frac{1}{|D_k|T} \sum_{\tau \in D_k} \sum_{t=0}^T (V_\phi(s_t) - \hat{R_t})^2$$
+  where $\hat{R_t}$ are the discounted rewards.
+\end{enumerate}
+
+Section based on \url{https://spinningup.openai.com/en/latest/user/introduction.html}
+
+\subsection{Importance sampling}
+
+Prediction problem: exploration policy $b$ (considered as fixed/given, e.g. $\epsilon$-greedy policy), target policy $\pi$ (e.g. optimal policy, considered as fixed/given, a common case is the deterministic greedy policy). We have episodes of experience obtained by following policy $b$. How to estimate $v_\pi$ or $q_\pi$ having episodes that followed exploration policy $b$.
+
+Assumption of coverage: $\pi(a \mid s) > 0$ implies $b(a \mid s) > 0$. Implication: $b$ must be stochastic in state where it is not identical to $\pi$.
+
+Importance sampling (IS) is a technique used for estimating expected values under one distribution given samples from another. In this context, IS is applied to off-policy learning by weighting returns according to the relative probability of their trajectories. Therefore, IS ratio over a trajectory is given by
+
+\begin{equation}
+  IS = \prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)}
+\end{equation}
+
+Now, $V_b (s) = \mathbb{E} [R_t \mid s_t = s]$, where $R_t$ is the sum of discounted rewards. Therefore, using the IS ratio,
+
+$V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)} R_t \mid s_t = s]$
+
+\subsection{Reparametrization trick}
+
+\url{https://arxiv.org/pdf/1312.6114.pdf}
+
+Let $Z \sim q_\phi(Z \mid X)$ be a conditional distribution. The reparametrization trick \ref{} consists in expressing the random varible $Z$ as a deterministic variable $Z = g_\phi(\varepsilon, X)$, being $\varepsilon$ an auxiliary variable with an independent marginal $P(\varepsilon)$.
+
+\section{Algorithms}
+
+\subsection{TRPO}
+
+Family: policy gradient
+
+Link: \url{https://arxiv.org/abs/1502.05477}
+
+\underline{TL;DR}
+
+TRPO \cite{schulman_trust_2015} is an on-policy algorithm that updates policies $\pi_\theta$ by gathering pairs of $(s,a)$ through experience, and updating iteratively the policy by finding the $\theta$ that solves an approximation of an optimization problem given by $\pi_{i+1} = \arg\max_\pi L_{\theta_i} = \mathbb{E} \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_old (a_t \mid s_t)}} A_t$ and constrained to $D_{KL}^{\max}(\theta_i, \theta) \leq \delta$. Such constraint is called the \textit{trust region} constraint, because it allows the policy to change with a safe learning step that iteratively adapts over the course of the learning.
+
+\underline{Problem addressed}
+
+\begin{enumerate}
+  \item Given the advantage $\eta(\tilde{\pi})$ of a policy $\tilde{\pi}$ over a policy $\pi$.
+  \item It was shown in Kakade and Langford (2002) that if $\pi_\theta(a \mid s)$ is a differentiable function of the parameter vector $\theta$, then an approximation of the advantage $L_\theta(\tilde{\theta})$ (which used visitation frequency $\rho_\theta$ instead of $\rho_{\tilde{\theta}}$) will match $\eta$ to first order, with a sufficiently small step $\alpha$.
+\end{enumerate}
+
+Problem: how to determine the sufficiently small step that improves the approximation $L_{\theta_{old}(\theta)}$, is also applicable to stochastic policies?
+
+
+\underline{Proposed approach}
+
+\begin{enumerate}
+  \item Replace step-size $\alpha$ with a distance measure between $\pi$ and $\tilde{\pi}$.
+  \item An algorithm similar to policy improvement is used to iteratively 1) calculate the advantages of the policy $\theta_i$ for every $s,a$ and 2) solves the constrained optimization problem $\pi_{i+1} = \arg\max_\pi [L_{\theta_i} - C D_{KL}^{\max}(\theta_i, \theta)]$.
+  \item Using the penalty coefficient $C$ will involve very small step sizes.
+  \item Therefore, an additional \textit{trust region constraint} is added to relax the optimization problem, that now seeks to maximize $L_{\theta}$, where the $KL$ divergence is subject to be lesser than a certain $\delta$.
+  \item Now, calculating the $KL$ divergence as it is, is infeasible due that it is bounded by every point in the state space.
+  Instead, it is calculated the average $KL$ divergence using importance sampling, replacing the expectations for sample averages, $Q$-values for empirical estimate, and approximating through Monte Carlo.
+  \item Two schemes proposed for this estimation:
+
+  \begin{enumerate}
+    \item Single path estimation, where states $s$ are sampled from $\rho$ (the visitation frequency) and then a policy $\pi_{\theta_{old}}$ is simulated for a number of timesteps to generate a trajectory, making $b(a \mid s) = \pi_{\theta_{old}}$.
+    Also, $Q_{\theta_{old}}$ is computed at each state-action pair taking the discounted sum of rewards along the trajectory.
+
+    \item Vine, where states $s$ are sampled from $\rho$ (the visitation frequency) and then a policy $\pi_{\theta_{old}}$ is simulated for a number of timesteps to generate a trajectory, just like in single path estimation.
+    Then, a subset of $N$ states of the trajectories are chosen (rollout set), and each of them are used to sample $K$ actions according to $b(a_{k \in K} \mid s_{n \in N})$. According to the authors, $b(s \mid a) = \pi_{\theta_i (s \mid a)}$ performs well in continuous problems, while the uniform distribution performs well on discrete tasks such as Atari.
+
+    $\hat{Q}_{\theta_i}(s_n, a_{n,k})$ is estimated by performing a rollout (i.e. a short trajectory) starting from state $s_n$ and action $a_{n,k}$.
+
+    Upsides against single path: better advantage estimation, less variance of the $Q$ value.
+    Downsides: need more simulations.
+  \end{enumerate}
+
+\end{enumerate}
+
+Summarized algorithm:
+
+\begin{enumerate}
+  \item Use single path or vine to gather $(s,a)$ pairs, estimating its $Q$-values with Monte Carlo and using the importance sampling ratio.
+  \item Averaging over samples, construct the estimated objective function and constraint.
+  \item Solve this optimization problem with constraint to update the policy vector $\theta$. In the paper, authors use conjugate gradient algorithm followed by a line search.
+\end{enumerate}
+
+
+\subsection{DDPG}
+
+Family: policy gradient
+
+Link: \url{https://arxiv.org/pdf/1509.02971.pdf}
+
+\underline{TL;DR}
+DDPG \cite{lillicrap_continuous_2015} is an off-policy actor critic algorithm that trains simultaneously a deterministic actor function $a$ and a critic function $Q$ with an experience memory.
+
+\underline{Problem addressed}
+
+How to use $Q$-learning algorithms when the action space is continuous?
+
+\underline{Proposed approach}
+
+DQN modified for actor critic. It learns a deterministic actor function $a(s \mid \theta_a)$ and a critic function $Q(s,a \mid \theta_c)$. As finding $\max_a Q(s,a)$ in continuous action spaces is computationally expensive, the max is instead approximated by $\max_a Q(s,a \mid \theta_c) \approx Q(s, a(s \mid \theta_a))$.
+
+Critic is updated with a mean squared error loss as in DQN, and actor policy is updated using the sampled policy gradient and applying the chain rule to find the $\theta_a$ that maximizes
+
+\begin{equation}
+  \nabla_{\theta_a} J (\pi_{\theta_a}) \approx \frac{1}{|N|} \sum_{s \in N} \nabla_{\theta_a} Q(s,a(s \mid \theta_a) \mid \theta_c) \nabla_{\theta_a} a(s \mid \theta_a)
+\end{equation}
+%
+where $N$ is the batch $\{(s_i, a_i, r_i, s_{i+1})\}^{|N|}_{i=1}$ and $|N|$ its size.
+
+As it is off-policy, DDPG uses a replay memory as in DQN to iteratively update its actor and critic networks by
+
+\begin{eqnarray}
+  \theta'_a &=& \rho \theta'_a + (1-\rho) \nabla J (\pi_{\theta_a}) \\
+  \theta'_c &=& \rho \theta'_c + (1-\rho) \theta_c
+\end{eqnarray}
+%
+where $\rho << 1$.
+On the other hand, actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
+
+
+\subsection{A3C}
+
+Family: policy gradient
+
+Link: \url{https://arxiv.org/pdf/1602.01783.pdf}
+
+\underline{TL;DR}
+
+Asynchronous Advantage Actor Critic (A3C) \cite{mnih_asynchronous_2016} is an asyncronous policy-based model free algorithm that consists on multiple agents running on environment in parallel, accumulating gradients and updating it after several timesteps.
+
+\underline{Problem addressed}
+
+Provide a different paradigm for deep RL algorithms that does not rely on experience replay for stabilizing learning and reducing training time and memory requirements.
+
+\underline{Proposed approach}
+
+\begin{itemize}
+  \item Instead of using experience replay, multiple agents are run in parallel on multiple instances of the environment. Each agent runs in its own thread and interacts with its own copy of the environment, and they apply the gradients after accumulating it over multiple timesteps, instead of using minibatches. In addition, agents may use different exploration policies in each thread so as to improve robustness.
+  \item As an actor critic architecture, it concurrently maintains a policy $\pi(a \mid s, \theta)$ and an estimation of the value function $V(s \mid \phi)$. Both are updated after a certain amount of timesteps $t$, and it is given by the estimate $\nabla_{\theta^-} \log \pi (a \mid s, \theta) A(s,a \mid \theta, \theta_v)$, being $A$ an estimate of the advantage function. A target network $\theta^-$ is shared among all agents.
+  \item Their synchronous, determinisic variant is called A2C.
+\end{itemize}
+
+
+
+\subsection{PPO}
+
+Link: \url{https://arxiv.org/abs/1707.06347}
+
+\underline{TL;DR}
+
+PPO \cite{schulman_proximal_2017} is an on-policy algorithm that updates its policy $\pi_{\theta_{k+1}}$ by taking gradient ascent over an objetive function that limits (by clipping or applying a penalization based on the KL divergence) how far the new policy can go.
+
+\underline{Problem addressed}
+
+How to take the biggest possible improvement step on a policy update without it being too much that the learning may collapse the performance?
+
+TRPO implements a penalty that is necessary, but as it is, optimizing its objective may involve excessively large update steps on the policy, prone to unstabilities.
+
+\underline{Proposed approach}
+
+Being $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}$ the probability ratio between the old policy and new policy, being $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)} = 1$ when it is the same policy.
+
+The approach of Proximal Policy Optimization (PPO) is to penalize changes of the policy that moves the coefficient $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}$ away from $1$. For that, the objective function proposed is given by
+
+\begin{equation}
+  \label{eqn_clipped_objective}
+  L_{\text{CLIP}} (\theta) = \hat{\mathbb{E}} [\min (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)} \hat{A}_t(s,a), \text{clip} (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)},1-\epsilon, 1+\epsilon) \hat{A}_t(s,a))]
+\end{equation}
+
+Put in other terms, if $\hat{A}_t(s,a) > 0$, this means that action $a$ is improving the policy. Therfore, the objective will be given by
+
+\begin{equation*}
+  L_{\text{CLIP}} (\theta) = \min (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}, 1+\epsilon) \hat{A}_t(s,a)
+\end{equation*}
+
+Otherwise, if $\hat{A}_t(s,a) < 0$, action $a$ is detrimental for the policy, and the objective will be given by
+
+\begin{equation*}
+  L_{\text{CLIP}} (\theta) = \max (\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{old}} (a_t \mid s_t)}, 1-\epsilon) \hat{A}_t(s,a)
+\end{equation*}
+
+In Equation \ref{eqn_clipped_objective}, the aim is 1) to prevent the surrogate (approximated) objective funtion to fall in ranges of $r_t(\theta)$ outside the interval $[1-\epsilon, 1+\epsilon]$ so as to limit the change in the policy, and 2) to take the minimum of the clipped and unclipped objective so the final objective is a lower (pessimistic) bound.
+
+As an alternative, a penalty that uses $KL$ divergence such as in TRPO and adapts its cost parameter $\beta$ according to the magnitude of the divergence may be used.
+
+\subsection{TD3}
+
+Family: Q Policy-gradient
+
+Link: \url{https://arxiv.org/pdf/1802.09477.pdf}
+
+\underline{TL;DR}
+
+TD3 \cite{fujimoto_addressing_2018} is an improvement of DDPG that uses two $Q$ functions and a delayed update of the actor policy in order to avoid overestimation of the $Q$ values.
+
+\underline{Problem addressed}
+
+How to avoid overestimation on the $Q$ function in DDPG?
+
+\underline{Proposed approach}
+
+Twin Delayed DDPG boosts DDPG by:
+
+\begin{itemize}
+  \item Using two $Q$ functions $Q_{\phi_1}$ and $Q_{\phi_2}$ instead of one, and using the smaller estimation of the two in order to compute the target $y$. The same target is used to update both.
+  \item Using a random noise for exploration, but clipping it in order to ensure it falls in valid action ranges.
+  \item Learning the policy by gradient ascent such as in DDPG, but only after a delay and by maximizing $J(\theta_a)$ regarding the value $Q_{\phi_1}$, (i.e. not using $Q_{\phi_2}$).
+\end{itemize}
+
+
+\subsection{SAC}
+
+Family: Q Policy-gradient
+
+Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
+
+\underline{TL;DR}
+
+SAC \cite{haarnoja_soft_2018} is an off-policy actor critic algorithm based in maximum entropy reinforcement learning with an stochastic actor (i.e. an actor that learns from sampling actions based on the current policy instead of using past actions from memory) with the aim of maximizing both the reward and entropy (i.e. succeed at the task while acting as randomly as possible).
+
+\underline{Problem addressed}
+
+Using an off-policy algorithm (to avoid sampling inefficiency), how to achieve stability and convergence in learning?
+
+\underline{Proposed approach}
+
+Proposed approach consisting in:
+
+\begin{itemize}
+  \item An off policy formulation to reuse previous experience.
+  \item An actor-critic architecture that learns 1) $Q_{\phi_1}$ and $Q_{\phi_2}$ functions as in TD3, 2) a policy $\pi_\theta$ and 3) a value function $V_\psi$. In this setting, the architecture employs a stochastic actor that sample actions from the learning policy in order to update the policy.
+  \item Using entropy regularized reinfocement learning in order to give the agent an extra reward proportional to the entropy of the policy at each time step, given by $\alpha H(\pi(a \mid s_t)) = \mathbb{E}[-log(\pi(a \mid s_t))]$, being $\alpha$ an hyper-parameter that controls such bonus and therefore the stochasticity of the optimal policy.
+\end{itemize}
+
+
+\subsection{R2D2}
+
+Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
+
+\underline{TL;DR}
+\underline{Problem addressed}
+\underline{Proposed approach}
+
+\subsection{TODOs}
+
+Policy-gradient
+
+\begin{itemize}
+  \item ACER \url{https://arxiv.org/pdf/1611.01224.pdf}
+  \item IMPALA \url{https://arxiv.org/pdf/1802.01561.pdf}
+  \item GAE \url{https://arxiv.org/pdf/1506.02438.pdf}
+\end{itemize}
+
+Q Policy-gradient
+
+\begin{itemize}
+  \item
+\end{itemize}
+
+Q-value algorithms
+\begin{itemize}
+  \item DQN
+  \item Rainbow
+  \item R2D2
+\end{itemize}
+
+Other
+
+\begin{itemize}
+  \item MAML for RL tasks
+\end{itemize}
+
+\section{Interesting papers}
+
+
+https://openreview.net/pdf?id=r1etN1rtPB
+
+
+\section{Good references}
+
+\begin{itemize}
+  \item \href{https://spinningup.openai.com/en/latest/spinningup/spinningup.html}{Open AI - Spinning Up as a Deep RL Researcher}
+  \item \href{http://incompleteideas.net/book/the-book-2nd.html}{R. Sutton and A. Barto - Reinforcement Learning: An Introduction (2nd Edition)} and \href{https://github.com/ShangtongZhang/reinforcement-learning-an-introduction}{Python implementation of the exercises}.
+  \item \href{https://www.alexirpan.com/2018/02/14/rl-hard.html}{A. Irpan - Deep Reinforcement Learning Doesn't Work Yet}
+  \item \href{https://lilianweng.github.io/lil-log/2018/02/19/a-long-peek-into-reinforcement-learning.html}{L. Weng: A (Long) Peek into Reinforcement Learning}
+  \item \href{http://arxiv.org/abs/1701.07274}{Y. Li - Deep Reinforcement Learning: An Overview}
+\end{itemize}
+
+
+
+
+
+\bibliographystyle{plainnat}
+\bibliography{bibliography.bib}
+
+\end{document}
