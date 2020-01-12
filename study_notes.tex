@@ -41,9 +41,11 @@ where $J(\pi_\theta)$ is the expected return of a policy $\pi$ parametrized with
 
 \newpage
 
-\section{Key concepts}
+\section{Reinforcement learning}
 
-\subsection{Policy gradient}
+\subsection{Key concepts}
+
+\subsubsection{Policy gradient}
 
 Given $\pi_\theta$, a stochastic policy parametrized with $\theta$. Our objective is to maximize the expected return
 \begin{equation}
@@ -112,7 +114,7 @@ Vanilla policy gradient is the simplest algorithm that makes use of this theorem
 
 Section based on \url{https://spinningup.openai.com/en/latest/user/introduction.html}
 
-\subsection{Importance sampling}
+\subsubsection{Importance sampling}
 
 Prediction problem: exploration policy $b$ (considered as fixed/given, e.g. $\epsilon$-greedy policy), target policy $\pi$ (e.g. optimal policy, considered as fixed/given, a common case is the deterministic greedy policy). We have episodes of experience obtained by following policy $b$. How to estimate $v_\pi$ or $q_\pi$ having episodes that followed exploration policy $b$.
 
@@ -128,15 +130,29 @@ Now, $V_b (s) = \mathbb{E} [R_t \mid s_t = s]$, where $R_t$ is the sum of discou
 
 $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)} R_t \mid s_t = s]$
 
-\subsection{Reparametrization trick}
+\subsubsection{Reparametrization trick}
 
 \url{https://arxiv.org/pdf/1312.6114.pdf}
 
 Let $Z \sim q_\phi(Z \mid X)$ be a conditional distribution. The reparametrization trick \ref{} consists in expressing the random varible $Z$ as a deterministic variable $Z = g_\phi(\varepsilon, X)$, being $\varepsilon$ an auxiliary variable with an independent marginal $P(\varepsilon)$.
 
-\section{Algorithms}
+\subsection{Deep RL Algorithms}
 
-\subsection{TRPO}
+\subsubsection{DQN}
+\label{DQN}
+
+Family: Q-value
+
+\underline{TL;DR}
+
+
+\underline{Problem addressed}
+\underline{Proposed approach}
+
+
+
+\subsubsection{TRPO}
+\label{TRPO}
 
 Family: policy gradient
 
@@ -191,14 +207,15 @@ Summarized algorithm:
 \end{enumerate}
 
 
-\subsection{DDPG}
+\subsubsection{DDPG}
+\label{DDPG}
 
-Family: policy gradient
+Family: Q policy gradient
 
 Link: \url{https://arxiv.org/pdf/1509.02971.pdf}
 
 \underline{TL;DR}
-DDPG \cite{lillicrap_continuous_2015} is an off-policy actor critic algorithm that trains simultaneously a deterministic actor function $a$ and a critic function $Q$ with an experience memory.
+DDPG \cite{lillicrap_continuous_2015} is an off-policy actor critic algorithm that trains simultaneously a deterministic actor function $a$ and a critic function $Q$ with an experience memory. As in continuous tasks is expensive to find $\max_a Q(s,a)$, the maximum of $Q$ is instead approximated by $Q(s, a(s \mid \theta_a))$.
 
 \underline{Problem addressed}
 
@@ -227,9 +244,10 @@ where $\rho << 1$.
 On the other hand, actions are selected by $Q(s, a(s \mid \theta_a)) + \varepsilon$, where $\varepsilon$ is a random exploration noise.
 
 
-\subsection{A3C}
+\subsubsection{A3C}
+\label{A3C}
 
-Family: policy gradient
+Family: policy gradient, distributed
 
 Link: \url{https://arxiv.org/pdf/1602.01783.pdf}
 
@@ -251,7 +269,8 @@ Provide a different paradigm for deep RL algorithms that does not rely on experi
 
 
 
-\subsection{PPO}
+\subsubsection{PPO}
+\label{PPO}
 
 Link: \url{https://arxiv.org/abs/1707.06347}
 
@@ -292,7 +311,8 @@ In Equation \ref{eqn_clipped_objective}, the aim is 1) to prevent the surrogate 
 
 As an alternative, a penalty that uses $KL$ divergence such as in TRPO and adapts its cost parameter $\beta$ according to the magnitude of the divergence may be used.
 
-\subsection{TD3}
+\subsubsection{TD3}
+\label{TD3}
 
 Family: Q Policy-gradient
 
@@ -317,7 +337,8 @@ Twin Delayed DDPG boosts DDPG by:
 \end{itemize}
 
 
-\subsection{SAC}
+\subsubsection{SAC}
+\label{SAC}
 
 Family: Q Policy-gradient
 
@@ -342,15 +363,41 @@ Proposed approach consisting in:
 \end{itemize}
 
 
-\subsection{R2D2}
+\subsubsection{Ape-X}
+\label{Ape-X}
 
+Family: Q-value / Q policy gradient, distributed
+Link: \url{https://arxiv.org/pdf/1803.00933.pdf}
+
+\underline{TL;DR}
+
+Ape-X \cite{} is an off-policy distributed algorithm that consists in a set of actors that gather experience and calculate their initial priorities, and a learner that .
+
+\underline{Problem addressed}
+\underline{Proposed approach}
+
+Extend experience replay to the distributed setting
+
+Deep RL algorithm decomposed into two parts:
+
+\begin{enumerate}
+  \item Acting: multiple actors that interacts with an environment, evaluates a policy implemented as a deep NN, and stores experience in a replay memory. Actors concurrently run on CPUs in order to generate data.
+  \item Learning: a single learner that samples batches of data from the memory to update its policy parameters. A single learner runs on GPU to sample the most useful experiences.
+\end{enumerate}
+
+\subsubsection{R2D2}
+\label{R2D2}
+
+Family:
 Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
 
 \underline{TL;DR}
 \underline{Problem addressed}
 \underline{Proposed approach}
 
-\subsection{TODOs}
+
+
+\subsubsection{TODOs}
 
 Policy-gradient
 
@@ -379,13 +426,21 @@ Other
   \item MAML for RL tasks
 \end{itemize}
 
-\section{Interesting papers}
 
+\subsection{[TODO] Applications}
+
+\subsubsection{AlphaStar}
+
+
+
+\subsection{[TODO] Interesting papers}
+
+\textbf{TODO}
 
 https://openreview.net/pdf?id=r1etN1rtPB
 
 
-\section{Good references}
+\subsection{Good references}
 
 \begin{itemize}
   \item \href{https://spinningup.openai.com/en/latest/spinningup/spinningup.html}{Open AI - Spinning Up as a Deep RL Researcher}
