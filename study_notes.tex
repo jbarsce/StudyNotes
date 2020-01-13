@@ -136,6 +136,13 @@ $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)}
 
 Let $Z \sim q_\phi(Z \mid X)$ be a conditional distribution. The reparametrization trick \ref{} consists in expressing the random varible $Z$ as a deterministic variable $Z = g_\phi(\varepsilon, X)$, being $\varepsilon$ an auxiliary variable with an independent marginal $P(\varepsilon)$.
 
+\subsection{LSTM}
+
+Link: https://arxiv.org/pdf/1503.04069.pdf, also http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+
+LSTM \cite{hochreiter_long_1997} \cite{greff_lstm_2017} ...
+
+
 \subsection{Deep RL Algorithms}
 
 \subsubsection{DQN}
@@ -371,9 +378,8 @@ Link: \url{https://arxiv.org/pdf/1803.00933.pdf}
 
 \underline{TL;DR}
 
-Ape-X \cite{} is an off-policy distributed algorithm that consists in a set of actors that gather experience and calculate their initial priorities, and a learner that .
+Ape-X \cite{} is an off-policy distributed algorithm that consists in a set of actors that gather experience and calculate their initial priorities, and a learner that updates the priorities and samples experiences and updates its priorities. This method can be used with both Q-value and Q-policy gradient algorithms.
 
-\underline{Problem addressed}
 \underline{Proposed approach}
 
 Extend experience replay to the distributed setting
@@ -381,19 +387,30 @@ Extend experience replay to the distributed setting
 Deep RL algorithm decomposed into two parts:
 
 \begin{enumerate}
-  \item Acting: multiple actors that interacts with an environment, evaluates a policy implemented as a deep NN, and stores experience in a replay memory. Actors concurrently run on CPUs in order to generate data.
-  \item Learning: a single learner that samples batches of data from the memory to update its policy parameters. A single learner runs on GPU to sample the most useful experiences.
+  \item Acting: multiple actors that interacts with an environment, evaluates a policy implemented as a deep NN, and stores experience in a shared global replay memory. Actors concurrently run on CPUs in order to generate data.
+  \item Learning: a single learner that samples batches of data from the memory to update its policy parameters. A single learner runs on GPU to sample the most useful experiences from the replay memory.
 \end{enumerate}
+
+As the method is off-policy, it can use algorithms such as DQN and its improvements such as dueling networks or double deep Q-networks, or algorithms such as DDPG.
 
 \subsubsection{R2D2}
 \label{R2D2}
 
 Family:
-Link: \url{https://arxiv.org/pdf/1801.01290.pdf}
+Link: \url{https://openreview.net/pdf?id=r1lyTjAqYX}
 
 \underline{TL;DR}
-\underline{Problem addressed}
+
+R2D2 improves Ape-X by using an LSTM layer after the convolutional stack, in order to ... .
+
 \underline{Proposed approach}
+
+R2D2 improves Ape-X by using an LSTM layer after the convolutional stack, and an n-step double Q-learning. In this version, rewards are not clipped, but instead .
+
+
+R2D3 \cite{paine_making_2019}
+
+\subsubsection{R2D3}
 
 
 
@@ -416,6 +433,8 @@ Q Policy-gradient
 Q-value algorithms
 \begin{itemize}
   \item DQN
+  \item Dueling DQN
+  \item Double DQN
   \item Rainbow
   \item R2D2
 \end{itemize}
@@ -431,6 +450,16 @@ Other
 
 \subsubsection{AlphaStar}
 
+
+\subsection{[TODO] Benchmarks}
+
+\begin{itemize}
+  \item OpenAI Gym
+  \item Atari
+  \item DeepMind Control Suite
+  \item DeepMind BSuite
+  \item DeepMind Lab
+\end{itemize}
 
 
 \subsection{[TODO] Interesting papers}
