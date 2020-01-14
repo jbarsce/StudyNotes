@@ -407,21 +407,34 @@ As the method is off-policy, it can use algorithms such as DQN and its improveme
 \subsubsection{R2D2}
 \label{R2D2}
 
-Family:
+Family: Q-value / Q policy gradient, distributed
 Link: \url{https://openreview.net/pdf?id=r1lyTjAqYX}
 
 \underline{TL;DR}
 
-R2D2 improves Ape-X by using an LSTM layer after the convolutional stack, in order to ... .
+R2D2 is built over Ape-X and improves it by using an LSTM layer after the convolutional stack, and an n-step double Q-learning, among other improvements.
 
 \underline{Proposed approach}
 
-R2D2 improves Ape-X by using an LSTM layer after the convolutional stack, and an n-step double Q-learning. In this version, rewards are not clipped, but instead .
+R2D2 builds over Ape-X, and applies several modifications:
 
+\begin{itemize}
+  \item It stores fixed length ($m=80$) sequences of transition tuples $(s,a,r)$, overlapping each of the adjacent sequences by 40 time-steps, and not crossing episode boundaries.
+  \item Using an LSTM layer after a convolutional stack.
+  \item Using n-step double Q-learning, with $n=5$
+  \item Using an invertible value function instead of clipping rewards.
+  \item Replay prioritization uses a mixture of max and mean absolute n-step TD errors $\delta_i$ over the sequence $\nu \max_i \delta_i + (1−\nu)^{\bar{\delta}}$, using $\nu=\bar{\delta}=0.9$.
+  \item Using a higher discount factor of $\gamma=0.997$ and disabled loss of life determining episode end in the Atari benchmark.
+\end{itemize}
+
+Improved by: R2D3 \ref{R2D3}
+
+\subsubsection{R2D3}
+\label{R2D3}
 
 R2D3 \cite{paine_making_2019}
 
-\subsubsection{R2D3}
+\underline{Proposed approach}
 
 
 
