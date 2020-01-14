@@ -407,7 +407,7 @@ As the method is off-policy, it can use algorithms such as DQN and its improveme
 \subsubsection{R2D2}
 \label{R2D2}
 
-Family: Q-value / Q policy gradient, distributed
+Family: Q-value, distributed
 Link: \url{https://openreview.net/pdf?id=r1lyTjAqYX}
 
 \underline{TL;DR}
@@ -416,7 +416,7 @@ R2D2 is built over Ape-X and improves it by using an LSTM layer after the convol
 
 \underline{Proposed approach}
 
-R2D2 builds over Ape-X, and applies several modifications:
+Recurrent Replay distributed DQN (R2D2) builds over Ape-X, and applies several modifications:
 
 \begin{itemize}
   \item It stores fixed length ($m=80$) sequences of transition tuples $(s,a,r)$, overlapping each of the adjacent sequences by 40 time-steps, and not crossing episode boundaries.
@@ -432,13 +432,25 @@ Improved by: R2D3 \ref{R2D3}
 \subsubsection{R2D3}
 \label{R2D3}
 
-R2D3 \cite{paine_making_2019}
+Family: Q-value, distributed
+Link: \url{https://arxiv.org/pdf/1909.01387.pdf}
+
+\underline{TL;DR}
+
+R2D3 \cite{paine_making_2019} is an off-policy algorithm that .
+
+\underline{Problem addressed}
+
+Tackle the problem of learning from demonstrations in hard exploration sparse-rewarded tasks with partially observable environments and highly variable initial conditions.
 
 \underline{Proposed approach}
 
+Recurrent Replay Distributed DQN from Demonstrations (R2D3) ...
 
 
 \subsubsection{TODOs}
+
+https://arxiv.org/pdf/1806.06923.pdf
 
 Policy-gradient
 
@@ -487,6 +499,7 @@ Other
 
 \subsection{[TODO] Hyper-parameter optimization}
 
+\subsection{[TODO] Frameworks}
 
 \subsection{[TODO] Interesting papers}
 
