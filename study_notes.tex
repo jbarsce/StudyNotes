@@ -407,6 +407,12 @@ SAC \cite{haarnoja_soft_2018} is an off-policy actor critic algorithm based in m
 
 Using an off-policy algorithm (to avoid sampling inefficiency), how to achieve stability and convergence in learning?
 
+\underline{Prior work}
+
+Link: \url{https://arxiv.org/pdf/1702.08165.pdf}
+
+This work is based in soft Q-learning \cite{haarnoja_reinforcement_2017}, which ... \textbf{TODO}
+
 \underline{Proposed approach}
 
 Proposed approach consisting in:
@@ -515,8 +521,10 @@ Q-value algorithms
 Other
 
 \begin{itemize}
-  \item MAML for RL tasks
+  \item
 \end{itemize}
+
+
 
 
 \subsection{[TODO] Applications}
@@ -541,6 +549,45 @@ Other
 \end{itemize}
 
 \subsection{[TODO] Hyper-parameter optimization}
+
+
+
+\subsection{Meta RL and Transfer Learning}
+
+\subsubsection{[TODO] $RL^2$}
+
+Link: \url{}
+
+\subsubsection{Pretraining}
+
+\textbf{TODO}
+
+https://arxiv.org/abs/1612.07307
+
+
+In \cite{haarnoja_reinforcement_2017}, network is pretrained ... \textbf{TODO}
+
+\subsubsection{MAML RL}
+
+Link: \url{https://arxiv.org/pdf/1703.03400.pdf}
+
+The goal in few-shot meta-learning in RL is to enable an agent to quickly acquire a policy for a goal or a new test task (e.g. a new environment) using a small amount of experience in the test task.
+
+As in RL the expected reward is normally not differentiable due to unknown dynamics, in MAML \cite{finn_model-agnostic_2017}, it is proposed a meta-learning algorithm with the following main loop:
+
+\begin{enumerate}
+  \item Sample a batch of tasks over a distribution of different tasks $T = \{T_1, \dots T_n\}$.
+  \item For each sampled task $T_i$, it samples $K$ trajectories following the policy parametrized with the global parameters $\theta$, in order to compute the gradient $\nabla_\theta J(\pi_\theta)$.
+  \item Apply gradient ascent to update a new set of weights $\theta'$ with a step size $\alpha$, used to sample $H$ new trajectories. Save parameters $\theta'$ until all the tasks of the batch are sampled.
+  \item For each sampled task in the batch, update global weights $\theta$ with gradient ascent over $\theta$ and using each respective policy parametrized by $\theta'$.
+\end{enumerate}
+
+
+\subsubsection{REPTL}
+
+
+\subsubsection{Fine-tuning}
+
 
 \subsection{[TODO] Frameworks}
 
