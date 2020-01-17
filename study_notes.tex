@@ -23,20 +23,6 @@
 
 \begin{document}
 
-RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
-
-Most RL algorithms can be divided into three families: policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_trajectory}), $Q$-value policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_value}) and $Q$-value algorithms (Eqn. \ref{eqn_action_value_function}).
-
-\begin{eqnarray}
-  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \label{eqn_policy_gradient_trajectory} \\
-  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_{\pi(s)} \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \label{eqn_policy_gradient_value}\\
-  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a] \label{eqn_action_value_function}
-\end{eqnarray}
-%
-where $J(\pi_\theta)$ is the expected return of a policy $\pi$ parametrized with $\theta$, $\tau$ is a trajectory with length $T$, and $d_{\pi(s)}$ is the probability distribution of the states.
-
-\newpage
-
 \tableofcontents
 
 \newpage
@@ -59,6 +45,18 @@ LSTM \cite{hochreiter_long_1997} \cite{greff_lstm_2017} ...
 
 
 \section{Reinforcement learning}
+
+RL in 3 Equations (from Nando de Freitas talk at Khipu 2019)
+
+Most RL algorithms can be divided into three families: policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_trajectory}), $Q$-value policy gradient algorithms (Eqn. \ref{eqn_policy_gradient_value}) and $Q$-value algorithms (Eqn. \ref{eqn_action_value_function}).
+
+\begin{eqnarray}
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_\tau [(\sum_{t=0}^T R_t \nabla_\theta \log \pi_\theta (a_t \mid s_t))] \label{eqn_policy_gradient_trajectory} \\
+  \nabla_\theta J(\pi_\theta) &=& \mathbb{E}_{d_{\pi(s)} \pi(a \mid s)} [Q_\pi(s,a) \nabla \log \pi_\theta (a \mid s)] \label{eqn_policy_gradient_value}\\
+  Q^*(s,a) &=& \mathbb{E}_{s'} [r(s,a,s') + \gamma max_{a'} Q^*(s',a') \mid s,a] \label{eqn_action_value_function}
+\end{eqnarray}
+%
+where $J(\pi_\theta)$ is the expected return of a policy $\pi$ parametrized with $\theta$, $\tau$ is a trajectory with length $T$, and $d_{\pi(s)}$ is the probability distribution of the states.
 
 \subsection{Key concepts}
 
@@ -154,7 +152,7 @@ $V_\pi (s) = \mathbb{E} [\prod_{i=1}^t \frac{\pi(a_i \mid s_i)}{b(a_i \mid s_i)}
 Let $Z \sim q_\phi(Z \mid X)$ be a conditional distribution. The reparametrization trick consists in expressing the random varible $Z$ as a deterministic variable $Z = g_\phi(\varepsilon, X)$, being $\varepsilon$ an auxiliary variable with an independent marginal $P(\varepsilon)$.
 
 
-\subsection{Deep RL Algorithms}
+\subsection{"Main" deep RL algorithms}
 
 \subsubsection{DQN}
 \label{DQN}
@@ -375,7 +373,7 @@ Link: \url{https://arxiv.org/pdf/1802.09477.pdf}
 
 \underline{TL;DR}
 
-TD3 \cite{fujimoto_addressing_2018} is an improvement of DDPG that uses two $Q$ functions and a delayed update of the actor policy in order to avoid overestimation of the $Q$ values.
+Twin Delayed DDPG (TD3) \cite{fujimoto_addressing_2018} is an improvement of DDPG that uses two $Q$ functions and a delayed update of the actor policy in order to avoid overestimation of the $Q$ values.
 
 \underline{Problem addressed}
 
@@ -411,7 +409,26 @@ Using an off-policy algorithm (to avoid sampling inefficiency), how to achieve s
 
 Link: \url{https://arxiv.org/pdf/1702.08165.pdf}
 
-This work is based in soft Q-learning \cite{haarnoja_reinforcement_2017}, which ... \textbf{TODO}
+This work is based in soft Q-learning \cite{haarnoja_reinforcement_2017}, which consists in learning a policy with its reward augmented such that the optimal policy is expressed via a Boltzmann distribution, and aims to maximize its entropy at each visited state in order to improve exploration and allow to better transfer skills between tasks. The maximum entropy policy is given by
+
+\begin{equation}
+  \pi^*_{max\_entropy} = \arg\max_\pi \sum_t \mathbb{E}_{(s_t, a_t) \sim \rho_\pi} [r(s_t, a_t) + \alpha H (\pi(. \mid s_t))]
+\end{equation}
+
+For that, they want to approximate "soft" versions of the Q and V functions, proposing soft Q and V as a generalization of the conventional "hard" Q and V. Soft Q and V are defined by
+
+\begin{eqnarray}
+  Q_{soft}^* (s_t, a_t) &=& r_t + \mathbb{E}_{(s_{t+1}) \sim \rho_\pi} [\sum_{l+1}^\infty \gamma^l (r_{t+1} + \alpha H(\pi_{max\_entropy}^* (. \mid s_{t+l})))] \\
+  V^*_{\text{soft}} &=& \alpha \log \int_A \exp \{\frac{1}{\alpha} Q_{soft}^* (s_t, a')\} da'
+\end{eqnarray}
+
+By Theorem 1, it is connected soft Q and V with the maximum entropy optimal policy by
+
+\begin{equation}
+  \pi^*_{maximum\_entropy}(a_t \mid s_t) = \exp\{\frac{1}{\alpha} (Q_{soft}^* (s_t, a_t) - V_{soft}^* (s_t))\}
+\end{equation}
+
+They propose an algorithm with an actor-critic setting based in the soft Q function and made tractable by an approximation and stochastic gradient descent.
 
 \underline{Proposed approach}
 
@@ -527,7 +544,7 @@ Other
 
 
 
-\subsection{[TODO] Applications}
+\subsection{[TODO] Milestones in RL}
 
 
 2019: \begin{itemize}
@@ -548,7 +565,7 @@ Other
   \item DeepMind Lab
 \end{itemize}
 
-\subsection{[TODO] Hyper-parameter optimization}
+\subsection{[TODO] Hyper-parameter tuning in RL}
 
 
 
@@ -597,7 +614,25 @@ As in RL the expected reward is normally not differentiable due to unknown dynam
   \item \href{https://stable-baselines.readthedocs.io/en/master/}{Stable baselines}
 \end{itemize}
 
-\subsection{[TODO] Interesting papers}
+\subsection{[TODO] Other algorithms and interesting papers}
+
+\subsubsection{HAC}
+
+Paper: \url{https://arxiv.org/pdf/1712.00948.pdf}
+Blog post: \url{http://bigai.cs.brown.edu/2019/09/03/hac.html}
+
+Hierarchical Arctor Critic (HAC) \cite{levy_learning_2019} is an algorithm that jointly learns a hierarchy of policies, by breaking a complex task into a set of subtasks consisting in short sequences of actions.
+
+Authors propose a framework consisting of
+
+\begin{enumerate}
+  \item A hierarchical policy architecture that yields transitions and reward functions at all levels, treating the policies generated by the below levels as optimal.
+  \item A method for learning multiple levels of policies independently and in parallel.
+\end{enumerate}
+
+
+\subsubsection{TODO}
+
 
 \textbf{TODO}
 
