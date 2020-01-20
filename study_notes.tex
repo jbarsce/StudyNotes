@@ -428,7 +428,7 @@ By Theorem 1, it is connected soft Q and V with the maximum entropy optimal poli
   \pi^*_{maximum\_entropy}(a_t \mid s_t) = \exp\{\frac{1}{\alpha} (Q_{soft}^* (s_t, a_t) - V_{soft}^* (s_t))\}
 \end{equation}
 
-They propose an algorithm with an actor-critic setting based in the soft Q function and made tractable by an approximation and stochastic gradient descent.
+They propose an algorithm with an actor-critic setting based in the soft Q function and made tractable by an approximation and Stein variational gradient descent (SVGD).
 
 \underline{Proposed approach}
 
@@ -581,8 +581,10 @@ Link: \url{}
 
 https://arxiv.org/abs/1612.07307
 
+On the other hand, in the experiments in \cite{haarnoja_reinforcement_2017}, a simulated robot agent is pretrained with their maximum entropy algorithm with a reward function that gives rewards when the robot moves quickly in an open environment (giving a reward equal to the speed of the center of mass), and then it is finetuned to similar tasks involving the same robot in different hallway environments.
 
-In \cite{haarnoja_reinforcement_2017}, network is pretrained ... \textbf{TODO}
+Interesting statement: "near-optimal policies are often near-deterministic, which makes them poor initializers for new tasks."
+
 
 \subsubsection{MAML RL}
 
