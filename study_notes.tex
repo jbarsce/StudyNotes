@@ -41,7 +41,25 @@ LSTM \cite{hochreiter_long_1997} \cite{greff_lstm_2017} ...
 
 \section{[TODO] Hyper-parameter tuning}
 
+Some approaches:
 
+"Classic"
+
+\begin{itemize}
+  \item Grid search, consisting in an exhaustive search of the hyper-parameter space.
+  \item Random search, consisting in a randomly-guided search over the hyper-parameter space, where samples are commonly chosen to be bounded over a hyper-sphere over the current maximum \cite{bergstra_random_2012}.
+\end{itemize}
+
+\begin{itemize}
+  \item SMAC \cite{hutter_sequential_2011}.
+  \item Tree-structured Parzen Estimators (TPE) \cite{bergstra_algorithms_2011}.
+  \item Covariance Matrix Adaptation Evolution Strategy (CMA-ES) \cite{loshchilov_cma-es_2016}
+\end{itemize}
+
+Bayesian Optimization \cite{snoek_practical_2012} \cite{shahriari_taking_2016}
+
+
+Neural architecture search
 
 
 \section{Reinforcement learning}
@@ -221,6 +239,17 @@ Summarized algorithm:
   \item Averaging over samples, construct the estimated objective function and constraint.
   \item Solve this optimization problem with constraint to update the policy vector $\theta$. In the paper, authors use conjugate gradient algorithm followed by a line search.
 \end{enumerate}
+
+
+\subsubsection{[TODO] GAE}
+\label{GAE}
+
+Family: Policy gradient
+
+Link: https://arxiv.org/pdf/1506.02438.pdf
+
+\underline{TL;DR}
+
 
 
 \subsubsection{DDPG}
