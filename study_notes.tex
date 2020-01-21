@@ -251,6 +251,14 @@ Link: https://arxiv.org/pdf/1506.02438.pdf
 \underline{TL;DR}
 
 
+\underline{Proposed approach}
+
+Generalized Advantage Estimation (GAE) proposes TRPO for the value function, which .
+
+\begin{itemize}
+  \item Using value functions to .
+\end{itemize}
+
 
 \subsubsection{DDPG}
 \label{DDPG}
@@ -606,11 +614,13 @@ Link: \url{}
 
 \subsubsection{Pretraining}
 
-\textbf{TODO}
+\underline{Self-supervision of policies}
 
-https://arxiv.org/abs/1612.07307
+In \cite{shelhamer_loss_2017} \href{https://arxiv.org/abs/1612.07307}{[link]}, it is proposed to perform self-supervision of policies ...
 
-On the other hand, in the experiments in \cite{haarnoja_reinforcement_2017}, a simulated robot agent is pretrained with their maximum entropy algorithm with a reward function that gives rewards when the robot moves quickly in an open environment (giving a reward equal to the speed of the center of mass), and then it is finetuned to similar tasks involving the same robot in different hallway environments.
+\underline{Pretraining in base environment and transfer to others}
+
+In the experiments in \cite{haarnoja_reinforcement_2017} \href{https://arxiv.org/pdf/1702.08165.pdf}{[link]}, a simulated robot agent is pretrained with their maximum entropy algorithm with a reward function that gives rewards when the robot moves quickly in an open environment (giving a reward equal to the speed of the center of mass), and then it is finetuned to similar tasks involving the same robot in different hallway environments.
 
 Interesting statement: "near-optimal policies are often near-deterministic, which makes them poor initializers for new tasks."
 
