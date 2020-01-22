@@ -616,7 +616,12 @@ Link: \url{}
 
 \underline{Self-supervision of policies}
 
-In \cite{shelhamer_loss_2017} \href{https://arxiv.org/abs/1612.07307}{[link]}, it is proposed to perform self-supervision of policies ...
+In \cite{shelhamer_loss_2017} \href{https://arxiv.org/abs/1612.07307}{[link]}, it is proposed to perform self-supervision of policies by resorting to
+
+\begin{enumerate}
+  \item A joint optimization of reinforcement learning and self-supervision, where an agent network is trained, sharing the inputs, encoder (eg convolutional neural network) and transitions with architectures that train by self-supervision. Each of them trains a task-specific decoder that is discarded once the pre-training is complete, where the shared representation is transfer back to the initial agent network.
+  \item Self-supervisory intrinsic rewards.
+\end{enumerate}
 
 \underline{Pretraining in base environment and transfer to others}
 
@@ -645,6 +650,11 @@ As in RL the expected reward is normally not differentiable due to unknown dynam
 
 
 \subsubsection{Fine-tuning}
+
+
+\subsubsection{Universal Meta-Learning for Reinforcement Learning}
+
+Link: https://arxiv.org/pdf/1806.04640.pdf
 
 
 \subsection{[TODO] Frameworks}
