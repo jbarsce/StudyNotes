@@ -626,9 +626,12 @@ Other
 
 \subsection{Meta RL and Transfer Learning}
 
-\subsubsection{[TODO] $RL^2$}
+\subsubsection{$RL^2$}
 
-Link: \url{}
+Link: \url{https://arxiv.org/pdf/1611.02779.pdf}
+
+In \cite{duan_rl2_2016}, it is proposed a meta-RL agent that consists in a "slow" RL agent with a recurrent neural network (RNN) that learns from tuples $(s,a,r,d)$ (being $d$ a flag indicating if the episode is done) that learns from multiple tasks, and a "fast" RL agent that learns the hidden state of the RNN across episodes of a single trial (a trial consists in $n$ episodes in a fixed MDP that is sampled from a set of known MDPs. At the next trial, another MDP is sampled and the hidden state of its policy is not preserved).
+
 
 \subsubsection{Pretraining}
 
