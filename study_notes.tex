@@ -602,12 +602,41 @@ Other
 \subsection{[TODO] Milestones in RL}
 
 
-2019: \begin{itemize}
-  \item AlphaStar \cite{}
-  \item Capture the Flag \cite{}
-  \item Dota 2 \cite{}
-  \item Multiagent \cite{}
-\end{itemize}
+2019:
+AlphaStar \cite{vinyals_grandmaster_2019}, a StarCraft II RL agent consisting in:
+
+  \begin{itemize}
+    \item Action policy $\pi_\theta (a_t \mid s_t, z)$, where $z$ is a stat that summarizes the strategy sampled from human data (e.g. the build order).
+
+    \item Self-attention mechanism to observe player and opponent units.
+
+    \item Deep LSTM to address partial observability.
+
+    \item Auto-regressive policy and recurrent pointer network to address the structural, combinatorial action space.
+
+    \item Agent updates asynchronously performed in the architecture, similar to A2C.
+
+    \item TD($\lambda$), clipped IS (V-trace) and self-imitation algorithm (UPGO, which moves the policy towards trajectories with above-average rewards) where used.
+
+    \item Agent parameters initially trained with supervised learning, where the agent is conditioned to following strategy $z$ performed by human replay data, receiving reward for correctly following it.
+
+    \item After the initial supervised learning training, agents are then trained with an RL algorithm that maximizes its win rate against a mixture of opponents chosen by a multi-agent procedure in order to converge to Nash equilibrium. For that, a "league of agents" was used, where three kind of agents can be sampled:
+
+    \begin{enumerate}
+      \item Main agents that adapts to the win rate of each opponent agent.
+      \item Main exploiter agents that plays against the current iteration of main agents, to force them to improve.
+      \item League exploiters, that find systemic issues of the entire league.
+    \end{enumerate}
+
+    \item AlphaStar agent trained with 32 TPUs over 44 days.
+  \end{itemize}
+
+Capture the Flag \cite{}
+
+Dota 2 \cite{}
+
+Multiagent \cite{}
+
 
 
 \subsection{[TODO] Benchmarks}
