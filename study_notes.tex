@@ -667,18 +667,30 @@ As in RL the expected reward is normally not differentiable due to unknown dynam
 \subsubsection{REPTL}
 
 
-\subsubsection{Fine-tuning}
-
-
 \subsubsection{Universal Meta-Learning for Reinforcement Learning}
 
 Link: https://arxiv.org/pdf/1806.04640.pdf
 
 
+\subsubsection{PEARL}
+
+Link: https://arxiv.org/pdf/1903.08254.pdf
+
+Probabilistic embeddings for actor-critic RL (PEARL)
+
 \subsubsection{Meta-Q-Learning}
 
 Link: https://arxiv.org/pdf/1910.00125v1.pdf
 
+Three contributions on the paper:
+
+\begin{enumerate}
+  \item Non-meta RL algorithms can perform well on current meta-RL benchmarks.
+  \item Maximizing the average reward of training tasks is an effective meta-learning metric.
+  \item An off-policy approach named meta-Q-learning (MQL) that maximizes the average rewards over meta-training tasks.
+\end{enumerate}
+
+MQL samples transitions from a shared meta-training replay memory, where transition from similar tasks are sampled. In order to reduce bias of sampling data from other tasks, they are considered 1) the similarity between a new task with the different meta-training tasks and 2) the odds of a transition to belong to a new task vs the meta-training buffer (propensity score).
 
 
 
