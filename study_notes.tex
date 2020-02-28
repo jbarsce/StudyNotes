@@ -52,7 +52,7 @@ Some approaches:
 
 \begin{itemize}
   \item SMAC \cite{hutter_sequential_2011}.
-  \item Tree-structured Parzen Estimators (TPE) \cite{bergstra_algorithms_2011}.
+  \item Tree-structured Parzen Estimators (TPE) \cite{bergstra_algorithms_2011}. TPE algorithm optimizes expected improvement (EI) acquisition function by modeling $P(X \mid y)$ and $P(y)$ instead of $P(y \mid X)$ (in other words, it takes a generative approach instead of a discriminative). This allows to replace the distributions of the configuration prior for non-parametric densities.
   \item Covariance Matrix Adaptation Evolution Strategy (CMA-ES) \cite{loshchilov_cma-es_2016}
 \end{itemize}
 
