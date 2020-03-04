@@ -54,6 +54,7 @@ Some approaches:
   \item SMAC \cite{hutter_sequential_2011}.
   \item Tree-structured Parzen Estimators (TPE) \cite{bergstra_algorithms_2011}. TPE algorithm optimizes expected improvement (EI) acquisition function by modeling $P(X \mid y)$ and $P(y)$ instead of $P(y \mid X)$ (in other words, it takes a generative approach instead of a discriminative). This allows to replace the distributions of the configuration prior for non-parametric densities.
   \item Covariance Matrix Adaptation Evolution Strategy (CMA-ES) \cite{loshchilov_cma-es_2016}
+  \item Population based training \cite{jaderberg_population_2017} consists of finding the optimal hyper-parameters by resorting to a population of models that are trained in parallel, and sharing solutions among them to increase the performance of individual workers.
 \end{itemize}
 
 Bayesian Optimization \cite{snoek_practical_2012} \cite{shahriari_taking_2016}
