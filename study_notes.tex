@@ -497,6 +497,23 @@ Proposed approach consisting in:
 \end{itemize}
 
 
+\subsubsection{IMPALA}
+\label{IMPALA}
+
+Family: policy gradient, distributed, off-policy
+Link: https://arxiv.org/pdf/1802.01561.pdf
+
+\underline{TL;DR}
+
+Importance Weighted Actor-Learner Architecture (IMPALA) ...
+
+\underline{Proposed approach}
+
+\begin{itemize}
+  \item IMPALA actors communicate trajectories of experience (sequences of states, actions, and rewards) to a centralised learner, instead of gradients such as in A3C.
+  \item V-trace off-policy actor-critic algorithm to avoid policy-lag between actors and the central learner(s).
+\end{itemize}
+
 \subsubsection{Ape-X}
 \label{Ape-X}
 
