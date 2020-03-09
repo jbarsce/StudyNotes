@@ -505,14 +505,8 @@ Link: https://arxiv.org/pdf/1802.01561.pdf
 
 \underline{TL;DR}
 
-Importance Weighted Actor-Learner Architecture (IMPALA) ...
+Importance Weighted Actor-Learner Architecture (IMPALA) is an off-policy actor-critic algorithm that involves parallel actors that learns and communicate trajectories to a centralized learner, which uses such learning to update its policy parameters. Before generating the next trajectories, actors retrieve the latest policy from the learner. In order to avoid the policy-lag between actor and learner(s), the V-trace (presented in this work) is used.
 
-\underline{Proposed approach}
-
-\begin{itemize}
-  \item IMPALA actors communicate trajectories of experience (sequences of states, actions, and rewards) to a centralised learner, instead of gradients such as in A3C.
-  \item V-trace off-policy actor-critic algorithm to avoid policy-lag between actors and the central learner(s).
-\end{itemize}
 
 \subsubsection{Ape-X}
 \label{Ape-X}
