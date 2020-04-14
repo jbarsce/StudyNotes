@@ -340,7 +340,15 @@ Link: \url{https://arxiv.org/pdf/1606.03476.pdf}
 
 GAIL \cite{ho_generative_2016} uses expert trajectories to learn a cost function over them and then learn an action policy...
 
+\underline{Background}
 
+Maximum causal inverse reinforcement learning (IRL) fits a cost function $c \in C$ that solves the optimization problem
+
+\begin{equation}
+  \max_{c \in C} (min_{\pi \in Pi} - H(\pi) + \mathbb{E}_\pi [c(s,a)]) - \mathbb{E}_{\pi_E}[c(s,a)]
+\end{equation}
+
+where $\pi \in \Pi$ is a policy from a set of stationary stochastic policies, and $H(.)$ is the $\gamma$-discounted causal entropy. The goal is to find a cost function $c$ that assigns a low cost to the expert policy and a high cost to other policies, allowing to find the expert policy through reinforcement learning.
 
 \underline{Problem addressed}
 
@@ -350,6 +358,7 @@ Learning a policy from example expert behavior in an efficient way. Other approa
   \item Behavioral cloning, which learns a policy as a supervised learning problem, over state-action pairs over expert trajectores. Downside: compounding error caused by covariance shift.
   \item Inverse Reinforcement Learning (IRL), which consists in learning a cost function over expert trajectories in which the expert is uniquely optimal. Downside: expensive to run.
 \end{itemize}
+
 
 \underline{Proposed approach}
 
@@ -577,7 +586,7 @@ Recurrent Replay Distributed DQN from Demonstrations (R2D3) builds upon R2D2 inc
 \subsubsection{TODOs}
 
 https://arxiv.org/pdf/1805.09801.pdf
-https://arxiv.org/pdf/2002.12928.pdf#cite.xu2018meta
+https://arxiv.org/pdf/2002.12928.pdf
 https://openreview.net/pdf?id=S1xitgHtvS
 
 
